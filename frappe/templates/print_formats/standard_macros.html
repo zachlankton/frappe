@@ -115,7 +115,7 @@ data-fieldname="{{ df.fieldname }}" data-fieldtype="{{ df.fieldtype }}"
 	<div class="letter-head">{{ letter_head }}</div>
 	{% endif %}
     {% if doc.print_heading_template %}
-        {{ frappe.render_template(doc.print_heading_template, {"doc":doc}) }}
+        {{ frappe.render_template(doc.print_heading_template, {"doc":doc, "page_num":page_num, "max_pages":max_pages}) }}
     {% else %}
     <div class="print-heading">
 		<h2>{{ doc.select_print_heading or (doc.print_heading if doc.print_heading != None
@@ -135,7 +135,4 @@ data-fieldname="{{ df.fieldname }}" data-fieldtype="{{ df.fieldtype }}"
 		<h4 style="margin: 0px;">{{ _("CANCELLED") }}</h4>
     </div>
 	{%- endif -%}
-	{% if max_pages > 1 %}
-	<p class="text-right page-number">{{ _("Page #{0} of {1}").format(page_num, max_pages) }}</p>
-	{% endif %}
 {%- endmacro -%}
