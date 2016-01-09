@@ -1,58 +1,22 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 from __future__ import unicode_literals
+from subprocess import *
 
 import pdfkit, os, frappe
 from frappe.utils import scrub_urls
 from frappe import _
 
 def get_pdf(html, options=None):
-	if not options:
-		options = {}
+	p = Popen(["prince",'-', '--baseurl=https://198.27.88.89', '--insecure', '--javascript'], stdin=PIPE, stdout=PIPE)
+	p.stdin.write("<html><body><p style=\"page-break-after: always;\"></p></body></html>"+html)
+	p.stdin.close()
+	pdf = p.stdout.read()
 
-	options.update({
-		"print-media-type": None,
-		"background": None,
-		"images": None,
-		'margin-top': '0.05in',
-		'margin-right': '0.05in',
-		'margin-bottom': '0.05in',
-		'margin-left': '0.05in',
-		'encoding': "UTF-8",
-		'quiet': None,
-		'no-outline': None,
-	})
+	tk = Popen(['pdftk', '-', 'cat', '2-end', 'output', '-'], stdin=PIPE, stdout=PIPE)
+	tk.stdin.write(pdf)
+	tk.stdin.close()
+	tkpdf = tk.stdout.read()
 
-	if frappe.session and frappe.session.sid:
-		options['cookie'] = [('sid', '{0}'.format(frappe.session.sid))]
+	return tkpdf
 
-	if not options.get("page-size"):
-		options['page-size'] = frappe.db.get_single_value("Print Settings", "pdf_page_size") or "A4"
-
-	html = scrub_urls(html)
-	fname = os.path.join("/tmp", frappe.generate_hash() + ".pdf")
-
-	try:
-		pdfkit.from_string(html, fname, options=options or {}, )
-
-		with open(fname, "rb") as fileobj:
-			filedata = fileobj.read()
-
-	except IOError, e:
-		if "ContentNotFoundError" in e.message or "ContentOperationNotPermittedError" in e.message:
-			# allow pdfs with missing images if file got created
-			if os.path.exists(fname):
-				with open(fname, "rb") as fileobj:
-					filedata = fileobj.read()
-
-			else:
-				frappe.throw(_("PDF generation failed because of broken image links"))
-		else:
-			raise
-
-	finally:
-		# always cleanup
-		if os.path.exists(fname):
-			os.remove(fname)
-
-	return filedata
