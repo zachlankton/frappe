@@ -9,14 +9,12 @@ from frappe import _
 
 def get_pdf(html, options=None):
 	p = Popen(["prince",'-', '--baseurl=https://198.27.88.89', '--insecure', '--javascript'], stdin=PIPE, stdout=PIPE)
-	p.stdin.write("<html><body><p style=\"page-break-after: always;\"></p></body></html>"+html)
+	p.stdin.write(html)
 	p.stdin.close()
 	pdf = p.stdout.read()
 
-	tk = Popen(['pdftk', '-', 'cat', '2-end', 'output', '-'], stdin=PIPE, stdout=PIPE)
-	tk.stdin.write(pdf)
-	tk.stdin.close()
-	tkpdf = tk.stdout.read()
 
-	return tkpdf
+	return pdf.replace(bytearray("/Rect [572.0000 752.0000 597.0000 777.0000]", "utf8"), bytearray("", "utf8"))
+
+
 
