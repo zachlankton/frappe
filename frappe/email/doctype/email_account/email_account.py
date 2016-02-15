@@ -344,7 +344,6 @@ class EmailAccount(Document):
 				reference_doctype = communication.reference_doctype,
 				reference_name = communication.reference_name,
 				message_id = communication.name,
-				unsubscribe_message = _("Leave this conversation"),
 				bulk=True)
 
 	def get_unreplied_notification_emails(self):
