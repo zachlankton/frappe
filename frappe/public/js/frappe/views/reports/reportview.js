@@ -266,13 +266,38 @@ frappe.views.ReportView = frappe.ui.Listing.extend({
 	render_list: function() {
 		var me = this;
 		var columns = this.get_columns();
-
+		
+		var report = frappe.get_doc("Report", this.docname)
+		totals = {}
 		// add sr in data
 		$.each(this.data, function(i, v) {
+			if (report.add_total_row == 1) {
+				$.each(v, function(idx, val){
+					if (typeof(val) == "number"){
+						if (totals.hasOwnProperty(idx)){
+							totals[idx] += parseFloat(val);
+						}else{
+							totals[idx] = parseFloat(val);
+						}
+					}else{
+						totals[idx] = "";
+					}
+				});
+			}
 			// add index
 			v._idx = i+1;
 			v.id = v._idx;
 		});
+		
+		if (report.add_total_row == 1){
+			totals._idx = "Totals";
+			totals.id = "Totals";
+			if (this.docname == "Shift Run Summary"){
+				totals.scrap_percent = 100 * (totals.total_scrap_parts / (totals.total_good_parts + totals.total_scrap_parts));
+			}
+			this.data.push(totals);
+			
+		}
 
 		var options = {
 			enableCellNavigation: true,

@@ -130,13 +130,17 @@ frappe.views.Gantt = frappe.views.CalendarBase.extend({
 			}
 
 			// class
-			if(me.style_map) {
-				v.cssClass = me.style_map[v.status]
-			} else if(me.get_css_class) {
-				v.cssClass = me.get_css_class(v);
-			} else {
-				v.cssClass = frappe.utils.guess_style(v.status, "standard")
-			}
+			//if(me.style_map) {
+			//	v.cssClass = me.style_map[v.status]
+			//} else if(me.get_css_class) {
+			//	v.cssClass = me.get_css_class(v);
+			//} else {
+			//	v.cssClass = frappe.utils.guess_style(v.status, "standard")
+			//}
+			if (v.status == "Overdue") {v.cssClass = "danger";}
+			if (v.status == "Open") {v.cssClass = "info";}
+			if (v.status == "Working") {v.cssClass = "warning";}
+			if (v.status == "Closed") {v.cssClass = "success";}
 
 			if(v.start && v.end) {
 				source.push({
